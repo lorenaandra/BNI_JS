@@ -79,7 +79,7 @@ app.post('/', (req, res)=>{
                                 throw err
                             } else {
                                 /* create base account for user if register == successful */
-                                var sold = Math.floor(Math.random() * (10000 - 1000 + 1)) + 1000;
+                                var sold = Math.floor(Math.random() * (100000 - 1000 + 1)) + 1000;
                                 var card_number = generate_iban(16)
                                 var records2 = [[iban, ID, sold, 1, card_number, 0, 0, 0]]
                                 con.query("INSERT into base_account (iban, user_id, sold, number_of_cards, card_number, has_savings_account, number_of_transfers, id_transfer) VALUES ?",
@@ -125,7 +125,7 @@ app.post('/', (req, res)=>{
 
 
 /// SIGN IN
-app.post('/sign-in',(req, res)=>{
+app.post('/sign-in', (req, res)=>{
     /* get data from form */
     var {email, password} = req.body;
     /* check if there is already an account tied to given email address */
@@ -138,16 +138,65 @@ app.post('/sign-in',(req, res)=>{
             "%'" + " AND password LIKE '%" + password + "%'", function(err_dtb2, result_dtb2, fields_dtb) {
                 if (err_dtb2) throw err_dtb2;
             })
-            res.redirect('back');
+            res.redirect('http://localhost:3000/home_account');
             //res.json("SUCCES, user " + result_dtb[0]['first_name'] + " " + result_dtb[0]['surname'] + " is logged in")
         } else {
+            res.redirect('http://localhost:3000')
             res.json('Invalid email/password combination! Please try again.')
             res.json('Did you mean to sign up?')
         }
     })
 })
 
+//// o sa fac doar sa primeasca receiver-ul pentru ca nu am datele celui care trimite (trebuie din session probabil nush)
+app.post('/transfer', (req, res)=>{
+    /* get transfer data */
+    var{email, IBAN, amount_of_money, description} = req.body;
+    con.query("SELECT user_id, sold FROM base_account WHERE iban LIKE '%" + IBAN + "%'", function(err, result, fields) {
+        if (err) 
+            throw err;
+                
+        if (result[0] != null) {
+            var newsold = parseInt(amount_of_money) + parseInt(result[0]['sold'])
+            con.query("UPDATE base_account SET sold = " + newsold + " WHERE iban LIKE '%" + IBAN + "%'", function(err_rec, result_rec, fields_rec) {
+                if (err_rec)
+                    throw err_rec;
 
+                con.query("SELECT count(*) from bank_transfer", function (err_cnt, result_cnt, fields_cnt) {
+
+                    if (err_cnt) throw err_cnt;
+                    /* initialize fields for database insertion */
+                    var transfer_ID = result_cnt[0]['count(*)']
+                    var today = new Date();
+                    var dd = String(today.getDate()).padStart(2, '0');
+                    var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+                    var yyyy = today.getFullYear();
+
+                    var today_string = yyyy + mm + dd;
+                    var todayy = parseInt(today_string)
+                    ////////////////// aici de modificat a doua valoare !!!!!!!!!!!!!!!!!
+                    records = [[transfer_ID, 30, todayy, amount_of_money, IBAN, result[0]]]
+                    con.query("INSERT INTO bank_transfer (transfer_id, sender_user_id, date, sum, iban_base_account, recipient_user_id) VALUES ?",
+                    [records], function(err_tr, res_tr, fields_tr) {
+                        if(err_tr) throw err_tr
+                        
+                        console.log("Transfer successfully completed!")
+                        res.redirect('http://localhost:3000/transfer')
+                    })
+                })
+            })
+
+            //// mai este de scazut bani de la ala care trimite (userul logat..)
+            // con.query("UPDATE base_account SET sold = " + newsold + " WHERE iban LIKE '%" + IBAN + "%'", function(err_rec, result_rec, fields_rec) {
+            //     if (err_rec)
+            //         throw err_rec; 
+            // })
+        } else {
+            res.json('Recipient not found')
+        }
+
+   })
+})
 
 
 app.listen(3001,()=>{

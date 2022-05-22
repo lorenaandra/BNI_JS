@@ -1,17 +1,39 @@
 import React, { Component } from 'react'
 
 class Transfer extends Component {
+
+  constructor(props)
+  {
+  
+    super(props);
+    this.state={
+      email:'',
+      IBAN:'',
+      amount_of_money:'',
+      description:''
+    }
+  }
+
+  handleChange= (event) =>{
+    event.preventDefault();
+    const {name, value} = event.target;
+  this.setState({[name]:value});
+  console.log(this.state);
+  }
+
   render() {
     return (
-      <form>
+      <form method='post' action='http://localhost:3001/transfer'>
         <h3>Create new transfer</h3>
 
         <div className="mb-3">
-          <label>Receiver full name</label>
+          <label>Receiver email</label>
           <input
             type="text"
+            name = 'email'
+            onChange={this.handleChange}
             className="form-control"
-            placeholder="Enter full name"
+            placeholder="Enter email"
           />
         </div>
 
@@ -19,6 +41,8 @@ class Transfer extends Component {
           <label>Receiver IBAN</label>
           <input
             type="text"
+            name = 'IBAN'
+            onChange={this.handleChange}
             className="form-control"
             placeholder="Enter IBAN" />
         </div>
@@ -26,7 +50,9 @@ class Transfer extends Component {
         <div className="mb-3">
           <label>Amount of money</label>
           <input
-            type="email"
+            type="text"
+            name = 'amount_of_money'
+            onChange={this.handleChange}
             className="form-control"
             placeholder="Enter amount"
           />
@@ -35,7 +61,9 @@ class Transfer extends Component {
         <div className="mb-3">
           <label>Description</label>
           <input
-            type="password"
+            type="text"
+            name = 'description'
+            onChange={this.handleChange}
             className="form-control"
             placeholder="Enter description"
           />
