@@ -79,6 +79,7 @@ app.post('/', (req, res)=>{
                             console.log(res);
                         });
                     }
+					//alert('Form received!');
                     res.json('Form received');
 	            })
             } else { // aici e cazul cand utilizatorul exista deja in baza de date cu emailul introdus
@@ -113,11 +114,3 @@ app.post('/', (req, res)=>{
 app.listen(3001,()=>{
   console.log("Port 3001");
 })
-
-
-
-
-
-
-
-
