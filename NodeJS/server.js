@@ -175,7 +175,7 @@ app.post('/transfer', (req, res)=>{
                     var today_string = yyyy + mm + dd;
                     var todayy = parseInt(today_string)
                     ////////////////// aici de modificat a doua valoare !!!!!!!!!!!!!!!!!
-                    records = [[transfer_ID, 30, todayy, amount_of_money, IBAN, result[0]]]
+                    records = [[transfer_ID, 30, todayy, amount_of_money, IBAN, result[0]['user_id']]]
                     con.query("INSERT INTO bank_transfer (transfer_id, sender_user_id, date, sum, iban_base_account, recipient_user_id) VALUES ?",
                     [records], function(err_tr, res_tr, fields_tr) {
                         if(err_tr) throw err_tr
