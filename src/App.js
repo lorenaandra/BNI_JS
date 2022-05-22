@@ -5,9 +5,10 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 
 import Login from '../src/components/sign-in'
 import SignUp from '../src/components/sign-up'
-// import Cards from './components/cards.component'
-// import Transfer from './components/transfer.components'
-// import SavingsAccount from './components/createSavingsAcc.components'
+import Home from '../src/components/home_account'
+import SavingsAccount from './components/savings_account'
+import Transfer from './components/create_transfer'
+import Cards from './components/cards'
 
 function App() {
   return (
@@ -37,6 +38,11 @@ function App() {
                   </Link>
                 </li>
                 <li className="nav-item">
+                  <Link className="nav-link" to={'/home_account'}>
+                    Home
+                  </Link>
+                </li>
+                <li className="nav-item">
                   <Link className="nav-link" to={'/transfer'}>
                     Create transfer
                   </Link>
@@ -62,9 +68,10 @@ function App() {
               <Route exact path="/" element={<Login />} />
               <Route path="/sign-in" element={<Login />} />
               <Route path="/sign-up" element={<SignUp />} />
-              {/* <Route path="/transfer" element={<Transfer />} />
+              <Route path="/home_account" element={<Home />} />
+              <Route path="/transfer" element={<Transfer />} />
               <Route path="/cards" element={<Cards />} />
-              <Route path="/sAccount" element={<SavingsAccount />} /> */}
+              <Route path="/sAccount" element={<SavingsAccount />} />
             </Routes>
           </div>
         </div>

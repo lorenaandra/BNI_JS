@@ -127,3 +127,15 @@ html,
 .text-right {
   text-align: right;
 }
+
+.text-sold {
+  text-align: center;
+  font-weight: bold;
+  color: #054394;
+  margin-bottom: 5px;
+}
+
+.button {
+  margin-bottom: 10px;
+  display: grid;
+}

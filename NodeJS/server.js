@@ -113,7 +113,8 @@ app.post('/', (req, res)=>{
                         
                     }
 					//alert('Form received!');
-                    res.json('Form received');
+                    //res.json('Form received');
+                    res.redirect('back');
 	            })
             } else { // aici e cazul cand utilizatorul exista deja in baza de date cu emailul introdus
                 res.json('Invalid email address! This email address is already being used. Please register using a new email address. :( Did you mean to sign in?')
@@ -137,7 +138,8 @@ app.post('/sign-in',(req, res)=>{
             "%'" + " AND password LIKE '%" + password + "%'", function(err_dtb2, result_dtb2, fields_dtb) {
                 if (err_dtb2) throw err_dtb2;
             })
-            res.json("SUCCES, user " + result_dtb[0]['first_name'] + " " + result_dtb[0]['surname'] + " is logged in")
+            res.redirect('back');
+            //res.json("SUCCES, user " + result_dtb[0]['first_name'] + " " + result_dtb[0]['surname'] + " is logged in")
         } else {
             res.json('Invalid email/password combination! Please try again.')
             res.json('Did you mean to sign up?')

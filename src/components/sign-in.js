@@ -48,7 +48,7 @@ class Login extends Component {
 
         <div className="d-grid">
           <button type="submit" className="btn btn-primary">
-            NU APASA INCA !!! Submit
+            Sign in
           </button>
         </div>
 

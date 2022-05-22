@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import { Link } from 'react-router-dom';
 
 class SignUp extends Component {
   
@@ -68,8 +69,9 @@ class SignUp extends Component {
           </div>
           <div className='d-grid'>
             <button type="submit" className="btn btn-primary">
-              Sign Up
+              Sign up
             </button>
+            {/* <Link to="/sign-in" type="button" className = 'btn btn-primary'> Sign up </Link> */}
           </div>
           <p className="forgot-password text-right">
             Already registered <a href="/sign-in">sign in?</a>
