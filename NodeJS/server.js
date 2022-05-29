@@ -1,8 +1,25 @@
 const express= require('express');
 const bodyParser=require('body-parser');
 const cors=require('cors');
+//const cookieParser = require('cookie-parser')
+const session = require('express-session')
 
 const app=express();
+
+var sess
+
+
+app.use(session({
+    secret: 'some bni secret',
+    cookie: {
+        maxAge: 5 * 60 * 1000,
+    
+    }, // 5 minute
+    saveUninitialized: false,
+    user: {}
+
+}))
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cors());
 
@@ -11,10 +28,10 @@ var mysql = require('mysql');
 
 /* create a connection variable with the required details */
 var con = mysql.createConnection({
-	host: "bnibanking2.cy0lqptttadh.us-east-1.rds.amazonaws.com",
+	host: "bnibanking.cct0fovy8hem.us-east-1.rds.amazonaws.com",
     port: 3306,
-    user: "bnibanking2",
-    password: "bnibanking2",
+    user: "bnibanking",
+    password: "bnibanking",
     database: "bni",
 });
  
@@ -79,7 +96,7 @@ app.post('/', (req, res)=>{
                                 throw err
                             } else {
                                 /* create base account for user if register == successful */
-                                var sold = Math.floor(Math.random() * (10000 - 1000 + 1)) + 1000;
+                                var sold = Math.floor(Math.random() * (100000 - 1000 + 1)) + 1000;
                                 var card_number = generate_iban(16)
                                 var records2 = [[iban, ID, sold, 1, card_number, 0, 0, 0]]
                                 con.query("INSERT into base_account (iban, user_id, sold, number_of_cards, card_number, has_savings_account, number_of_transfers, id_transfer) VALUES ?",
@@ -123,28 +140,166 @@ app.post('/', (req, res)=>{
 })
 
 
+app.get('/sign-in',(req, res) => {
+    res.send(sess)
+   // res.send(req.session.user.name)
+})
+
 
 /// SIGN IN
 app.post('/sign-in',(req, res)=>{
+    console.log(req.session.cookie)
     /* get data from form */
     var {email, password} = req.body;
-    /* check if there is already an account tied to given email address */
-    con.query("SELECT first_name, surname FROM user WHERE email LIKE '%" + email + 
-            "%'" + " AND password LIKE '%" + password + "%'", function(err_dtb, result_dtb, fields_dtb) {
-        if (err_dtb) throw err_dtb;
-        /* check if credentials match any entry in database */
-        if (result_dtb[0] != null) {
-            con.query("UPDATE user set isOnline = 1 where email LIKE '%" + email + 
-            "%'" + " AND password LIKE '%" + password + "%'", function(err_dtb2, result_dtb2, fields_dtb) {
-                if (err_dtb2) throw err_dtb2;
-            })
-            res.redirect('back');
-            //res.json("SUCCES, user " + result_dtb[0]['first_name'] + " " + result_dtb[0]['surname'] + " is logged in")
+    console.log(req.body)
+    if (email && password) {
+        if (req.session.authenticated) {
+            //res.json(req.session.authenticated)
+            /* if already authenticated, go to home page */
+            res.redirect(`http://localhost:3000/home_account`)//:${req.session.user.name}`);
+
+            /* check if there is already an account tied to given email address */
+            
         } else {
-            res.json('Invalid email/password combination! Please try again.')
-            res.json('Did you mean to sign up?')
+            con.query("SELECT first_name, surname, id_user FROM user WHERE email LIKE '%" + email + 
+                    "%'" + " AND password LIKE '%" + password + "%'", function(err_dtb, result_dtb, fields_dtb) {
+                if (err_dtb) {
+                    console.log("ERROR1 "+err_dtb)
+                    throw err_dtb;
+                }
+                /* check if credentials match any entry in database */
+                if (result_dtb[0] != null) {
+                    req.session.authenticated = true;
+                    req.session.user = {
+                        name: result_dtb[0]['first_name'] + result_dtb[0]['surname'],
+                        id: result_dtb[0]['id_user']
+                    }
+                    sess = {
+                        id: result_dtb[0]['id_user']
+                    }
+                    //console.log(req.session)
+                    con.query("UPDATE user set isOnline = 1 where email LIKE '%" + email + 
+                    "%'" + " AND password LIKE '%" + password + "%'", function(err_dtb2, result_dtb2, fields_dtb) {
+                        if (err_dtb2) {
+                            console.log("ERROR2 " + err_dtb2)
+
+                            throw err_dtb2
+                        };
+                    })
+                    res.redirect(`http://localhost:3000/home_account`)
+                    //res.redirect(`http://localhost:3000/home_account:${result_dtb[0]['first_name']}${result_dtb[0]['surname']}`);
+                    //res.json("SUCCES, user " + result_dtb[0]['first_name'] + " " + result_dtb[0]['surname'] + " is logged in")
+                } else {
+                    res.redirect('http://localhost:3000')
+                    res.json('Invalid email/password combination! Please try again.')
+                    res.json('Did you mean to sign up?')
+                }
+            })
+        }
+    }
+
+    
+})
+
+// app.post('/transfer', (req, res) => {
+//     console.log(req.body.email) //req.body.id
+//     console.log("datele celui care transfera: ", sess.email + " " + sess.password)
+// }) 
+
+app.post('/transfer', (req, res)=>{
+    /* get transfer data */
+    var senderID = req.session.user.id
+    var{email, IBAN, amount_of_money, description} = req.body;
+    con.query("SELECT user_id, sold FROM base_account WHERE iban LIKE '%" + IBAN + "%'", function(err, result, fields) {
+        if (err) 
+            throw err;
+                
+        if (result[0] != null) {
+            // scade bani la sender
+            con.query("SELECT user_id, sold FROM base_account WHERE user_id LIKE '%" + senderID+ "%'", function(err, result, fields) {
+            if (err) {
+                throw err;
+            } else {
+                var senderSold = parseInt(result[0]['sold']) - parseInt(amount_of_money)
+                con.query("UPDATE base_account SET sold = " + senderSold + " WHERE user_id LIKE'%" + senderID + "%'", function(err_rec, result_rec, fields_rec) {
+                    if (err_rec)
+                        throw err_rec;
+                })
+
+
+            }})
+
+            //aduna bani la receiver
+
+            var newsold = parseInt(amount_of_money) + parseInt(result[0]['sold'])
+            con.query("UPDATE base_account SET sold = " + newsold + " WHERE iban LIKE '%" + IBAN + "%'", function(err_rec, result_rec, fields_rec) {
+                if (err_rec)
+                    throw err_rec;
+
+                con.query("SELECT count(*) from bank_transfer", function (err_cnt, result_cnt, fields_cnt) {
+
+                    if (err_cnt) throw err_cnt;
+                    /* initialize fields for database insertion */
+                    var transfer_ID = result_cnt[0]['count(*)']
+                    var today = new Date();
+                    var dd = String(today.getDate()).padStart(2, '0');
+                    var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+                    var yyyy = today.getFullYear();
+
+                    var today_string = yyyy + mm + dd;
+                    var todayy = parseInt(today_string)
+                    ////////////////// aici de modificat a doua valoare !!!!!!!!!!!!!!!!!
+                    var records = [[transfer_ID, senderID, todayy, amount_of_money, IBAN, result[0]['user_id']]]
+                    con.query("INSERT INTO bank_transfer (transfer_id, sender_user_id, date, sum, iban_base_account, recipient_user_id) VALUES ?",
+                    [records], function(err_tr, res_tr, fields_tr) {
+                        if(err_tr) throw err_tr
+                        
+                        console.log("Transfer successfully completed!")
+                        res.redirect('http://localhost:3000/transfer')
+                    })
+                })
+            })
+
+            //// mai este de scazut bani de la ala care trimite (userul logat..)
+            // con.query("UPDATE base_account SET sold = " + newsold + " WHERE iban LIKE '%" + IBAN + "%'", function(err_rec, result_rec, fields_rec) {
+            //     if (err_rec)
+            //         throw err_rec; 
+            // })
+        } else {
+            res.json('Recipient not found')
+        }
+
+   })
+})
+
+app.get('/home_account', (req, res)=> {
+    res.send(req.session)
+    // console.log(req.cookie)
+    // console.log(req.session.user)
+    if (req.session.user) {
+    var userID = req.session.user.id
+    con.query("SELECT iban, sold FROM base_account WHERE user_id LIKE '%" + userID + "%'", function(err, result, fields) {
+        if (err) {
+            throw err;
+        } else {
+           var iban = result[0]['iban']
+           var sold = result[0]['sold']
+           req.session.user.iban = iban
+           req.session.user.sold = sold
+           con.query("SELECT first_name, surname FROM user WHERE user_id LIKE '%" + userID + "%'", function(err, result, fields) {
+            if (err) {
+                throw err;
+            } else {
+                var firstname = result[0]['first_name']
+                var lastname = result[0]['surname']
+                req.session.user.firstname = firstname
+                req.session.user.lastname = lastname
+                res.json("succes " + res.session.user)
+            }})
         }
     })
+}
+
 })
 
 
@@ -153,3 +308,4 @@ app.post('/sign-in',(req, res)=>{
 app.listen(3001,()=>{
   console.log("Port 3001");
 })
+exports.sess = sess;

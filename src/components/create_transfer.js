@@ -23,7 +23,7 @@ class Transfer extends Component {
 
   render() {
     return (
-      <form method='post' action='http://localhost:3001/create_transfer'>
+      <form method='post' action='http://localhost:3001/transfer'>
         <h3>Create new transfer</h3>
 
         <div className="mb-3">
@@ -50,7 +50,7 @@ class Transfer extends Component {
         <div className="mb-3">
           <label>Amount of money</label>
           <input
-            type="email"
+            type="text"
             name = 'amount_of_money'
             onChange={this.handleChange}
             className="form-control"

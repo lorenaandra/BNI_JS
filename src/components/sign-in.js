@@ -1,6 +1,9 @@
 import React, { Component } from 'react'
 
+
+
 class Login extends Component {
+
 
   constructor(props)
   {
@@ -8,7 +11,8 @@ class Login extends Component {
     super(props);
     this.state={
       email:'',
-      password:''
+      password:'',
+      session : {}
     }
   }
 
@@ -18,6 +22,19 @@ class Login extends Component {
   this.setState({[name]:value});
   console.log(this.state);
   }
+
+  componentDidMount() {
+    fetch('http://localhost:3001/sign-in')
+      .then(res => {
+          console.log(res);
+         // return res.json()
+       })
+      .then(session => { 
+          
+          this.setState({ session })
+          console.log("mysession " + session?.id); 
+       });
+   }
 
   render() {
     return (
@@ -63,3 +80,4 @@ class Login extends Component {
 }
 
 export default Login;
+//export const session = Login.this.state.session
