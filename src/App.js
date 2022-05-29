@@ -16,7 +16,50 @@ import Cards from './components/cards'
 
 function App() {
 
-  const [data, setState] = useState({})
+  
+  const [data, setData] = useState({});
+
+  //  useEffect(() => {
+  //   // Your code here
+  //   fetch('http://localhost:3001/sign-in')
+  //     .then(res => res.json())
+  //        //return res.json()
+      
+      
+  //     .then(data => setData(data))
+  //     .then(console.log("app daata " + data))
+  // })
+
+  const verify = () => {
+
+  const fetchData = () => {
+
+    fetch('http://54.174.7.45:3001/')
+
+      .then((response) => response.json())
+
+      .then((data) => {
+
+        setData(data);
+
+
+      })
+      .then(console.log("app daata " + data.iban))
+
+  };
+    setInterval(fetchData, 500)
+}
+
+  useEffect(() => {
+    if (data.iban === undefined) {
+      verify();
+    }
+
+    
+
+  });
+
+  if (data.iban !== undefined) {
 
   return (
     <Router>
@@ -34,7 +77,7 @@ function App() {
 
             <div className="collapse navbar-collapse" id="navbarTogglerDemo02">
               <ul className="navbar-nav ml-auto">
-                <li className="nav-item">
+                {/* <li className="nav-item">
                   <Link className="nav-link" to={'/sign-in'}>
                     Sign in
                   </Link>
@@ -43,7 +86,7 @@ function App() {
                   <Link className="nav-link" to={'/sign-up'}>
                     Sign up
                   </Link>
-                </li>
+                </li> */}
                 <li className="nav-item">
                   <Link className="nav-link" to={'/home_account'}>
                     Home
@@ -85,6 +128,54 @@ function App() {
       </div>
     </Router>
   )
+  } else {
+
+    return (
+      <Router>
+        <div className="App">
+          <nav className="navbar navbar-expand-lg navbar-light fixed-top">
+            <div className="container">
+              
+              <div className="logo-image">
+                <img src = "logoBNI.png" className="img-fluid"></img>
+              </div>
+  
+              <span className="navbar-brand">
+                BNI Banking
+              </span>
+  
+              <div className="collapse navbar-collapse" id="navbarTogglerDemo02">
+                <ul className="navbar-nav ml-auto">
+                  <li className="nav-item">
+                    <Link className="nav-link" to={'/sign-in'}>
+                      Sign in
+                    </Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link className="nav-link" to={'/sign-up'}>
+                      Sign up
+                    </Link>
+                  </li>
+                  </ul>
+              </div>
+            </div>
+          </nav>
+  
+          <div className="auth-wrapper">
+            <div className="auth-inner">
+              <Routes>
+                <Route exact path="/" element={<Login />} />
+                <Route path="/sign-in" element={<Login />} />
+                <Route path="/sign-up" element={<SignUp />} />
+                
+              </Routes>
+            </div>
+          </div>
+        </div>
+      </Router>
+    )
+  }
+
 
   // useEffect(() => {
   //   userId => setState(cookie.load('userId'))
@@ -127,8 +218,7 @@ function App() {
 //    return;
 //  },[dbdata]);
 
-  console.log("my data " + Login.session)
-  console.log("data name "+ data?.name)
+
 
   // if (data?.name !== undefined) {
   //   return (

@@ -28,10 +28,10 @@ var mysql = require('mysql');
 
 /* create a connection variable with the required details */
 var con = mysql.createConnection({
-	host: "bnibanking.cct0fovy8hem.us-east-1.rds.amazonaws.com",
+	host: "bnibanking2.cy0lqptttadh.us-east-1.rds.amazonaws.com",
     port: 3306,
-    user: "bnibanking",
-    password: "bnibanking",
+    user: "bnibanking2",
+    password: "bnibanking2",
     database: "bni",
 });
  
@@ -44,9 +44,7 @@ con.connect(function(err) {
 });
 
 
-app.get('/',(req,res)=>{
-  res.json('OK');
-})
+
 
 /* function that generates a random string of number of given size */
 function generate_iban(n) {
@@ -140,10 +138,12 @@ app.post('/', (req, res)=>{
 })
 
 
-app.get('/sign-in',(req, res) => {
-    res.send(sess)
-   // res.send(req.session.user.name)
-})
+// app.get('/',(req, res) => {
+//     if(!req.session.user) {
+//         res.json("NOTOK")
+//     } 
+//    // res.send(req.session.user.name)
+// })
 
 
 /// SIGN IN
@@ -156,7 +156,7 @@ app.post('/sign-in',(req, res)=>{
         if (req.session.authenticated) {
             //res.json(req.session.authenticated)
             /* if already authenticated, go to home page */
-            res.redirect(`http://localhost:3000/home_account`)//:${req.session.user.name}`);
+            res.redirect(`http://54.174.7.45:3000/home_account`)//:${req.session.user.name}`);
 
             /* check if there is already an account tied to given email address */
             
@@ -186,11 +186,61 @@ app.post('/sign-in',(req, res)=>{
                             throw err_dtb2
                         };
                     })
-                    res.redirect(`http://localhost:3000/home_account`)
+                    app.get('/',(req,res)=>{
+                        //res.json(sess.id)
+
+                        //partea de home
+
+                        con.query("SELECT iban, sold, card_number FROM base_account WHERE user_id LIKE '%" + sess.id + "%'", function(err, result, fields) {
+                            if (err) {
+                                throw err;
+                            } else {
+                              //  res.send(result[0])
+                               var iban = result[0]['iban']
+                               var sold = result[0]['sold']
+                               var cardNR = result[0]['card_number']
+                               sess.iban = iban
+                               sess.sold = sold
+                               sess.cardNR = cardNR
+                               con.query("SELECT first_name, surname FROM user WHERE id_user LIKE '%" + sess.id + "%'", function(err, result, fields) {
+                                if (err) {
+                                    throw err;
+                                } else {
+                                    var firstname = result[0]['first_name']
+                                    var lastname = result[0]['surname']
+                                    sess.firstname = firstname
+                                    sess.lastname = lastname
+                                    // res.json(sess)
+                                    // res.json("succes " + req.session.user.iban + " " + req.session.user.sold + " " + req.session.user.firstname + 
+                                    // " " + req.session.user.lastname)
+                                }})
+                                // query la card
+                                con.query("SELECT cvv, expiration_date FROM card WHERE user_id LIKE '%" + sess.id + "%'", function(err, result2, fields){
+                                    if (err) {
+                                        throw err;
+                                    } else {
+                                        var cvv = result2[0]['cvv'];
+                                        var anul = result2[0]['expiration_date'].toString().slice(0,4);
+                                        var luna = result2[0]['expiration_date'].toString().slice(4,6)
+                                        sess.anul = anul;
+                                        sess.luna = luna;
+                                        sess.cvv = cvv
+                                        res.json(sess)
+
+                                    }
+                                })
+                            }
+                        })
+
+
+
+                    })
+                   res.redirect(`http://54.174.7.45:3000/home_account`)
+                    
                     //res.redirect(`http://localhost:3000/home_account:${result_dtb[0]['first_name']}${result_dtb[0]['surname']}`);
                     //res.json("SUCCES, user " + result_dtb[0]['first_name'] + " " + result_dtb[0]['surname'] + " is logged in")
                 } else {
-                    res.redirect('http://localhost:3000')
+                    res.redirect('http://54.174.7.45:3000')
                     res.json('Invalid email/password combination! Please try again.')
                     res.json('Did you mean to sign up?')
                 }
@@ -200,6 +250,8 @@ app.post('/sign-in',(req, res)=>{
 
     
 })
+
+
 
 // app.post('/transfer', (req, res) => {
 //     console.log(req.body.email) //req.body.id
@@ -255,7 +307,7 @@ app.post('/transfer', (req, res)=>{
                         if(err_tr) throw err_tr
                         
                         console.log("Transfer successfully completed!")
-                        res.redirect('http://localhost:3000/transfer')
+                        res.redirect('http://54.174.7.45:3000/transfer')
                     })
                 })
             })
@@ -273,20 +325,23 @@ app.post('/transfer', (req, res)=>{
 })
 
 app.get('/home_account', (req, res)=> {
-    res.send(req.session)
+   // res.send(req.session)
     // console.log(req.cookie)
     // console.log(req.session.user)
     if (req.session.user) {
+       
     var userID = req.session.user.id
+    console.log("user id ", userID)
     con.query("SELECT iban, sold FROM base_account WHERE user_id LIKE '%" + userID + "%'", function(err, result, fields) {
         if (err) {
             throw err;
         } else {
+          //  res.send(result[0])
            var iban = result[0]['iban']
            var sold = result[0]['sold']
            req.session.user.iban = iban
            req.session.user.sold = sold
-           con.query("SELECT first_name, surname FROM user WHERE user_id LIKE '%" + userID + "%'", function(err, result, fields) {
+           con.query("SELECT first_name, surname FROM user WHERE id_user LIKE '%" + userID + "%'", function(err, result, fields) {
             if (err) {
                 throw err;
             } else {
@@ -294,7 +349,9 @@ app.get('/home_account', (req, res)=> {
                 var lastname = result[0]['surname']
                 req.session.user.firstname = firstname
                 req.session.user.lastname = lastname
-                res.json("succes " + res.session.user)
+                res.json(req.session.user.firstname)
+                // res.json("succes " + req.session.user.iban + " " + req.session.user.sold + " " + req.session.user.firstname + 
+                // " " + req.session.user.lastname)
             }})
         }
     })

@@ -23,7 +23,7 @@ class Transfer extends Component {
 
   render() {
     return (
-      <form method='post' action='http://localhost:3001/transfer'>
+      <form method='post' action='http://54.174.7.45:3001/transfer'>
         <h3>Create new transfer</h3>
 
         <div className="mb-3">

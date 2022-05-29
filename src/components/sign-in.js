@@ -24,7 +24,7 @@ class Login extends Component {
   }
 
   componentDidMount() {
-    fetch('http://localhost:3001/sign-in')
+    fetch('http://54.174.7.45:3001/sign-in')
       .then(res => {
           console.log(res);
          // return res.json()
@@ -32,13 +32,13 @@ class Login extends Component {
       .then(session => { 
           
           this.setState({ session })
-          console.log("mysession " + session?.id); 
+         console.log("mysession " + session); 
        });
    }
 
   render() {
     return (
-      <form method='post' action='http://localhost:3001/sign-in'>
+      <form method='post' action='http://54.174.7.45:3001/sign-in'>
         <h3>Sign In</h3>
 
         <div className='mb-3'>

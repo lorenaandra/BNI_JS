@@ -108,7 +108,7 @@ html,
 .flex-container {
   display: flex;
   flex-direction: column;
-  background-color: #5975cc;
+  background-color: #ffffff;
 }
 
 .flex-container > div {
@@ -136,6 +136,14 @@ html,
 }
 
 .button {
+  margin-bottom: 10px;
+  display: grid;
+}
+
+.button_cards {
+  background-color: #1053ab;
+  border-radius: 8px;
+  color: white;
   margin-bottom: 10px;
   display: grid;
 }

@@ -24,7 +24,7 @@ class SignUp extends Component {
   
   render(){
     return (
-      <form method='post' action='http://localhost:3001'>
+      <form method='post' action='http://54.174.7.45:3001'>
         <h3>Sign Up</h3>
           
           <div className='mb-3'>

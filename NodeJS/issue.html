@@ -1,0 +1,26 @@
+<html>
+<head>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.10.3/dist/tf.min.js" crossorigin=""></script>
+</head>
+
+<body>
+<script>
+async function loadModel() {
+    console.log('Loading model');
+    const model = await tf.loadModel('model.json');
+    console.log('Model loaded');
+	console.log(model);
+	return model;
+};
+const model = loadModel();
+
+// do other stuff
+
+console.log(model);  //this line produces the error above
+
+tensor = tf.randomNormal([1,256,256,1]);
+model.predict(tensor).print();
+
+</script>
+</body>
+</html>

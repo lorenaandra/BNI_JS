@@ -2,12 +2,44 @@ import React, { Component } from 'react'
 
 class Cards extends Component {
 
-  style = {
-    color: 'black'
-  };
+  constructor(props)
+    {
+    
+      super(props);
+      this.state={
+        session : {}
+        
+      }
+    }
+
+    componentDidMount() {
+      
+      fetch('http://54.174.7.45:3001/', {credentials: "same-origin"})
+
+      .then(res => res.json())
+
+      .then(
+          (result) => {
+            this.setState({
+              session: result
+            })
+          })
+     
+  }
 
   handleClick() {
-    alert("Setat card default");
+    alert("Card set as default!");
+    
+  }
+
+  handleClick2() {
+    
+  }
+
+  changeStyle_button(){
+    alert("Can't remove card as default!");
+    var element = document.getElementById("myDiv");
+    element.style.backgroundColor = "#d9153c";
   }
 
   render() {
@@ -16,35 +48,18 @@ class Cards extends Component {
         <h2>Cards</h2>
 
         <div className="flex-container">
-          <div style={this.style} onClick={this.handleClick}>
-            <div className='text-align'>Card 1</div>
-            <div>Popescu Alexandru</div>
-            <div className='text-right'>9876 4567 6543 1234</div>
+          <div id = "myDiv" onClick={this.handleClick}>
+            <div className='text-align'>Main card</div>
+            <div>{this.state.session.firstname + " " + this.state.session.lastname}</div>
+            <div className='text-right'>{this.state.session.cardNR}</div>
+            <div>CVV: {this.state.session.cvv}</div>
+            <div>Valid Thru: {this.state.session.anul + "/" + this.state.session.luna}</div>
+        
+
           </div>
 
-          <div onClick={this.handleClick}>
-            <div className='text-align'>Card 2</div>
-            <div>Popescu Alexandru</div>
-            <div className='text-right'>1234 6543 5678 9087</div>
-          </div>
+          <button className="button_cards" onClick={this.changeStyle_button}> Remove card as default </button>
 
-          <div onClick={this.handleClick}>
-            <div className='text-align'>Card 3</div>
-            <div>Popescu Alexandru</div>
-            <div className='text-right'>5442 2782 9829 3448</div>
-          </div>
-
-          <div onClick={this.handleClick}>
-            <div className='text-align'>Card 4</div>
-            <div>Popescu Alexandru</div>
-            <div className='text-right'>3487 8374 3348 7347</div>
-          </div>
-
-          <div onClick={this.handleClick}>
-            <div className='text-align'>Card 5</div>
-            <div>Popescu Alexandru</div>
-            <div className='text-right'>3484 0998 2398 2378</div>
-          </div>
         </div>
       </form>
 
